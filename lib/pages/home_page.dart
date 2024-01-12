@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:open_weather_cubit/constants/constants.dart';
+import 'package:open_weather_cubit/cubits/temp_settings/temp_settings_cubit.dart';
 import 'package:open_weather_cubit/cubits/weather/weather_cubit.dart';
 
 import 'package:open_weather_cubit/pages/search_page.dart';
+import 'package:open_weather_cubit/pages/settings_page.dart';
 import 'package:open_weather_cubit/widgets/error_dialog.dart';
 import 'package:recase/recase.dart';
 
@@ -21,29 +23,47 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Weather'),
         actions: [
           IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () async {
-                _city = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) {
-                    return SearchPage();
-                  }),
-                );
-                print('city: $_city');
-                if (_city != null) {
-                  context.read<WeatherCubit>().fetchWeather(_city!);
-                }
-              }),
+            icon: const Icon(Icons.search),
+            onPressed: () async {
+              _city = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return SearchPage();
+                }),
+              );
+              print('city: $_city');
+              if (_city != null) {
+                context.read<WeatherCubit>().fetchWeather(_city!);
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return const SettingsPage();
+                }),
+              );
+            },
+          ),
         ],
-        title: Text('Weather'),
       ),
       body: _showWeather(),
     );
   }
 
   String showTemperature(double temperature) {
+    final tempUnit = context.watch<TempSettingsCubit>().state.tempUnit;
+
+    if (tempUnit == TempUnit.fahrenheit) {
+      return ((temperature * 9 / 5) + 32).toStringAsFixed(2) + '℉';
+    }
+    
     return temperature.toStringAsFixed(2) + '℃';
   }
 
